@@ -4,7 +4,7 @@ from django.forms.models import model_to_dict
 from django.shortcuts import get_list_or_404, get_object_or_404
 from ninja import Router, Schema
 
-from .models import Category, Image, Product
+from .models import Category, Product
 
 router = Router()
 
@@ -46,4 +46,56 @@ def update_category(request, id: int, payload: CategorySchemaIn):
 def delete_category(request, id: int):
     category = get_object_or_404(Category, id=id)
     category.delete()
+    return 200, None
+
+
+class ProductSchemaOut(Schema):
+    id: int
+    name: str
+    category_id: int
+    quantity: int
+    price_sell: float
+    price_buy: float
+
+
+class ProductSchemaIn(Schema):
+    name: str
+    category_id: int
+    quantity: int
+    price_sell: float
+    price_buy: float
+
+
+@router.get('/product', response=List[ProductSchemaOut])
+def get_products(request):
+    product = get_list_or_404(Product)
+    return product
+
+
+@router.get('/product/{int:id}', response=ProductSchemaOut)
+def get_product_by_id(request, id: int):
+    product = get_object_or_404(Product, id=id)
+    return product
+
+
+@router.post("/product", response={200: None})
+def create_product(request, payload: ProductSchemaIn):      
+    Product.objects.create(**payload.dict())
+    return 200, None
+    
+
+
+@router.put('/product/{int:id}', response={200: None})
+def update_product(request, id: int, payload: ProductSchemaIn):
+    product = get_object_or_404(Product, id=id)
+    for attr, value in payload.dict().items():
+        setattr(product, attr, value)
+    product.save()
+    return 200, None
+
+
+@router.delete('/product/{int:id}', response={200: None})
+def delete_product(request, id: int):
+    product = get_object_or_404(Product, id=id)
+    product.delete()
     return 200, None
