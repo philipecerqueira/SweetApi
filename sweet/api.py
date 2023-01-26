@@ -1,7 +1,11 @@
 from ninja import NinjaAPI
 
-from store.api import router as store_router
+from store.api.store_router import store_router
+
+# from store.apiOld import router as store_router
+
+
 
 api = NinjaAPI()
 
-api.add_router('/store/', store_router)
+api.add_router('/store', store_router)
