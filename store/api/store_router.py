@@ -1,7 +1,7 @@
 from ninja import Router
 
-from .category.category_router import category_router
-from .product.product_router import product_router
+from .category.api import category_router
+from .product.api import product_router
 
 store_router = Router()
 

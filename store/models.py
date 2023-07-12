@@ -8,9 +8,11 @@ class Category(models.Model):
     def __str__(self):
         return self.title
 
+
 class Product(models.Model):
     name = models.CharField(max_length=40, unique=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(
+        Category, on_delete=models.SET_NULL, null=True)
     quantity = models.FloatField()
     price_sell = models.FloatField()
     price_buy = models.FloatField()
@@ -30,6 +32,7 @@ class Product(models.Model):
     def profit(self):
         profit = self.price_sell - self.price_buy
         return (profit * 100) / self.price_buy
+
 
 class Image(models.Model):
     image = models.ImageField(upload_to="products_images")
