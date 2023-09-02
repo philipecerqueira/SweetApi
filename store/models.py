@@ -13,7 +13,6 @@ class Product(models.Model):
     name = models.CharField(max_length=40, unique=True)
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True)
-    quantity = models.FloatField()
     price_sell = models.FloatField()
     price_buy = models.FloatField()
     slug = models.SlugField(unique=True, blank=True, null=True)
@@ -37,3 +36,10 @@ class Product(models.Model):
 class Image(models.Model):
     image = models.ImageField(upload_to="products_images")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+
+class Cart(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL, null=True)
+    quantity = models.FloatField()
+    observation = models.CharField(max_length=200)

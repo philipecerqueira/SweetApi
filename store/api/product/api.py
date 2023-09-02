@@ -3,7 +3,7 @@ from typing import List
 from django.shortcuts import get_list_or_404
 from ninja import Router, Schema
 
-from ...models import Product
+from ...models import Category, Product
 from .schemas.product_schema_in import ProductSchemaIn
 from .schemas.product_schema_out import ProductSchemaOut
 
@@ -22,8 +22,15 @@ def get_product_by_id(request, id: int):
     return product
 
 
-@product_router.post("/", response={200: None})
+@product_router.post("/", response={200: None, 401: str})
 def create_product(request, payload: ProductSchemaIn):
+    category_id = payload.category_id
+
+    try:
+        category = Category.objects.get(id=category_id)
+    except Category.DoesNotExist:
+        return 401, f"O produto com o ID {category_id} não existe."
+
     Product.objects.create(**payload.dict())
     return 200, None
 
