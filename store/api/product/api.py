@@ -1,6 +1,6 @@
 from typing import List
 
-from django.shortcuts import get_list_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 from ninja import Router, Schema
 
 from ...models import Category, Product
@@ -22,22 +22,30 @@ def get_product_by_id(request, id: int):
     return product
 
 
-@product_router.post("/", response={200: None, 401: str})
+@product_router.post("/", response={200: None, 400: str})
 def create_product(request, payload: ProductSchemaIn):
     category_id = payload.category_id
 
     try:
         category = Category.objects.get(id=category_id)
     except Category.DoesNotExist:
-        return 401, f"O produto com o ID {category_id} não existe."
+        return 400, f"The category with ID {category_id} does not exist."
 
     Product.objects.create(**payload.dict())
     return 200, None
 
 
-@product_router.put('/{int:id}', response={200: None})
+@product_router.put('/{int:id}', response={200: None, 400: str})
 def update_product(request, id: int, payload: ProductSchemaIn):
     product = get_object_or_404(Product, id=id)
+
+    category_id = payload.category_id
+
+    try:
+        category = Category.objects.get(id=category_id)
+    except Category.DoesNotExist:
+        return 400, f"The category with ID {category_id} does not exist."
+
     for attr, value in payload.dict().items():
         setattr(product, attr, value)
     product.save()

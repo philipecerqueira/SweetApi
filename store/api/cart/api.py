@@ -1,6 +1,6 @@
 from typing import List
 
-from django.shortcuts import get_list_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 from ninja import Router, Schema
 
 from ...models import Cart, Product
@@ -16,23 +16,29 @@ def get_cart(request):
     return cart
 
 
-@cart_router.post("/", response={200: None, 401: str})
+@cart_router.post("/", response={200: None, 400: str})
 def add_cart(request, payload: CartSchemaIn):
-    print("PAYLOAD", payload)
     product_id = payload.product_id
 
     try:
         product = Product.objects.get(id=product_id)
     except Product.DoesNotExist:
-        return 401, f"O produto com o ID {product_id} não existe."
+        return 400, f"The product with ID {product_id} does not exist."
 
     Cart.objects.create(**payload.dict())
     return 200, None
 
 
-@cart_router.put('/{int:id}', response={200: None})
+@cart_router.put('/{int:id}', response={200: None, 400: str, 404: object})
 def update_cart(request, id: int, payload: CartSchemaIn):
     cart = get_object_or_404(Cart, id=id)
+    product_id = payload.product_id
+
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return 400, f"The product with ID {product_id} does not exist."
+
     for attr, value in payload.dict().items():
         setattr(cart, attr, value)
     cart.save()
